@@ -188,134 +188,27 @@ This project is for educational and demonstration purposes.
 
 *Built with ❤️ using Python, Hugging Face, and Gradio*
 
+## 🧠 Project Architecture
 
-' Form1.vb
-Imports System.Drawing
-Imports System.Windows.Forms
+```mermaid
+flowchart TD
+    subgraph Input[Data Collection & Preprocessing]
+        A[Crawler<br>• Scrape transcripts<br>• Extract raw text] --> B[Data Cleaning<br>• Tokenize, remove noise<br>• Store CSV/JSON]
+    end
 
-Public Class Form1
-    Inherits Form
+    subgraph Models[Model Components]
+        B --> C[Theme Classifier<br>• BART / Zero-shot<br>• Episode-level themes]
+        B --> D[Character Network<br>• NER + Relationship extraction<br>• Graph via NetworkX / PyVis]
+        B --> E[Jutsu Classifier<br>• DistilBERT fine-tuned<br>• Classify Ninjutsu / Taijutsu / Genjutsu]
+    end
 
-    Public Sub New()
-        Me.Text = "Series_Analyzer - Architecture Diagram"
-        Me.ClientSize = New Size(1000, 700)
-        Me.DoubleBuffered = True
-        Me.BackColor = Color.White
-    End Sub
+    subgraph Interaction[UI & Chat System]
+        C --> F[Gradio UI<br>• app.py / gradio_app.py<br>• Interactive web interface]
+        D --> F
+        E --> F
+        F <--> G[Character Chatbot<br>• Llama / Gemini API<br>• Retrieval-based dialogue]
+    end
 
-    Protected Overrides Sub OnPaint(e As PaintEventArgs)
-        MyBase.OnPaint(e)
-        Dim g As Graphics = e.Graphics
-        g.SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
-
-        Dim titleFont As New Font("Segoe UI", 14, FontStyle.Bold)
-        Dim boxFont As New Font("Segoe UI", 9)
-        Dim smallFont As New Font("Segoe UI", 8)
-        Dim boldFont As New Font("Segoe UI", 9, FontStyle.Bold)
-
-        ' Helper to draw a rounded rectangle-ish box with text
-        Dim drawBox = Sub(x As Integer, y As Integer, w As Integer, h As Integer, header As String, lines As String())
-                          Dim rect As New Rectangle(x, y, w, h)
-                          Using brush = New SolidBrush(Color.FromArgb(230, 245, 255))
-                              g.FillRectangle(brush, rect)
-                          End Using
-                          g.DrawRectangle(Pens.Black, rect)
-                          g.DrawString(header, boldFont, Brushes.Black, New PointF(x + 8, y + 6))
-                          Dim ty As Integer = y + 28
-                          For Each ln In lines
-                              g.DrawString(ln, boxFont, Brushes.Black, New PointF(x + 8, ty))
-                              ty += 16
-                          Next
-                      End Sub
-
-        ' Draw title
-        g.DrawString("Series_Analyzer — High level architecture", titleFont, Brushes.Black, New PointF(12, 8))
-
-        ' Positions for boxes
-        Dim leftX As Integer = 30
-        Dim midX As Integer = 370
-        Dim rightX As Integer = 690
-        Dim topY As Integer = 70
-        Dim rowGap As Integer = 140
-
-        ' Crawler box
-        drawBox(leftX, topY, 260, 80, "Crawler", New String() {"Scrape transcripts", "Extract raw text"})
-
-        ' Data / Preprocessing box
-        drawBox(leftX, topY + rowGap, 260, 100, "Data / Preprocessing", New String() {"Cleaning, tokenization", "Save CSV/JSON for models"})
-
-        ' Theme classifier
-        drawBox(midX, topY, 260, 100, "Theme Classifier", New String() {"Transformers (zero-shot)", "Episode-theme scores"})
-
-        ' Character Network
-        drawBox(midX, topY + rowGap, 260, 100, "Character Network", New String() {"spaCy NER", "NetworkX / PyVis", "Graph visualizations"})
-
-        ' Jutsu classifier
-        drawBox(rightX, topY, 260, 80, "Jutsu Classifier", New String() {"DistilBERT fine-tuned", "Ninja-technique labels"})
-
-        ' Chatbot
-        drawBox(rightX, topY + rowGap, 260, 100, "Character Chatbot", New String() {"LLM (Gemini/Llama)", "Retrieval-augmented dialog"})
-
-        ' Gradio / UI at bottom center
-        Dim uiX As Integer = 240
-        Dim uiY As Integer = topY + rowGap * 2 + 20
-        drawBox(uiX, uiY, 520, 110, "Gradio UI / Serving (app.py, gradio_app.py)", New String() {"Interactive UI", "Trigger model endpoints", "Visualize networks & chat"})
-
-        ' Draw arrows / flows (simple lines + arrows)
-        Dim drawArrow = Sub(x1 As Integer, y1 As Integer, x2 As Integer, y2 As Integer)
-                            g.DrawLine(New Pen(Color.Black, 2), x1, y1, x2, y2)
-                            ' draw simple arrow head
-                            Dim ang As Double = Math.Atan2(y2 - y1, x2 - x1)
-                            Dim len As Integer = 12
-                            Dim arrow1X As Integer = x2 - CInt(len * Math.Cos(ang - Math.PI / 6))
-                            Dim arrow1Y As Integer = y2 - CInt(len * Math.Sin(ang - Math.PI / 6))
-                            Dim arrow2X As Integer = x2 - CInt(len * Math.Cos(ang + Math.PI / 6))
-                            Dim arrow2Y As Integer = y2 - CInt(len * Math.Sin(ang + Math.PI / 6))
-                            g.DrawLine(Pens.Black, x2, y2, arrow1X, arrow1Y)
-                            g.DrawLine(Pens.Black, x2, y2, arrow2X, arrow2Y)
-                        End Sub
-
-        ' arrows from crawler -> data
-        drawArrow(leftX + 200, topY + 40, leftX + 50, topY + rowGap + 10)
-
-        ' arrows from data -> Theme classifier & Character network & Jutsu classifier
-        drawArrow(leftX + 200, topY + rowGap + 50, midX + 30, topY + 30) ' to Theme
-        drawArrow(leftX + 200, topY + rowGap + 50, midX + 30, topY + rowGap + 50) ' to Character network
-        drawArrow(leftX + 200, topY + rowGap + 50, rightX + 30, topY + 30) ' to jutsu
-
-        ' arrows from Theme, Network, Jutsu -> UI
-        drawArrow(midX + 260, topY + 40, uiX + 30, uiY + 15)
-        drawArrow(midX + 260, topY + rowGap + 40, uiX + 160, uiY + 15)
-        drawArrow(rightX + 260, topY + 40, uiX + 450, uiY + 15)
-
-        ' arrow from UI -> Chatbot and Chatbot outputs to UI
-        drawArrow(uiX + 480, uiY + 50, rightX + 100, topY + rowGap + 40)
-        drawArrow(rightX + 80, topY + rowGap + 70, uiX + 480, uiY + 80)
-
-        ' Small labels for flows
-        g.DrawString("raw transcripts", smallFont, Brushes.DarkBlue, New PointF(leftX + 120, topY + 32))
-        g.DrawString("cleaned data", smallFont, Brushes.DarkBlue, New PointF(leftX + 140, topY + rowGap + 60))
-        g.DrawString("themes", smallFont, Brushes.DarkGreen, New PointF(midX + 60, topY + 10))
-        g.DrawString("NER -> Graph", smallFont, Brushes.DarkGreen, New PointF(midX + 60, topY + rowGap + 10))
-        g.DrawString("jutsu labels", smallFont, Brushes.DarkGreen, New PointF(rightX + 60, topY + 10))
-        g.DrawString("user interactions (classify / view / chat)", smallFont, Brushes.Black, New PointF(uiX + 10, uiY + 95))
-
-        ' Legend box
-        Dim legendX As Integer = 760
-        Dim legendY As Integer = 20
-        g.DrawRectangle(Pens.Black, legendX, legendY, 210, 90)
-        g.DrawString("Legend", boldFont, Brushes.Black, New PointF(legendX + 8, legendY + 6))
-        g.DrawString("- Crawler -> Data -> Models -> UI", smallFont, Brushes.Black, New PointF(legendX + 8, legendY + 34))
-        g.DrawString("- Models: Theme / Network / Jutsu", smallFont, Brushes.Black, New PointF(legendX + 8, legendY + 52))
-        g.DrawString("- Chatbot uses retrieval + LLM", smallFont, Brushes.Black, New PointF(legendX + 8, legendY + 70))
-
-    End Sub
-
-    <STAThread()>
-    Public Shared Sub Main()
-        Application.EnableVisualStyles()
-        Application.SetCompatibleTextRenderingDefault(False)
-        Application.Run(New Form1())
-    End Sub
-
-End Class
+    style Input fill:#DDF3FF,stroke:#3399FF,stroke-width:2px
+    style Models fill:#EAFBEA,stroke:#009933,stroke-width:2px
+    style Interaction fill:#FFF7DD,stroke:#FFB300,stroke-width:2px
