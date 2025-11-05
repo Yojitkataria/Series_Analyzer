@@ -187,3 +187,41 @@ This project is for educational and demonstration purposes.
 ---
 
 *Built with ❤️ using Python, Hugging Face, and Gradio*
+
+
+import gradio as gr
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 1. This is the "drawing" function
+# It creates a plot using matplotlib
+def create_plot(amplitude):
+    # Generate some simple data
+    x = np.linspace(0, 10, 100)
+    y = amplitude * np.sin(x)
+    
+    # Create the plot
+    fig = plt.figure()
+    plt.plot(x, y, label=f'Amplitude = {amplitude}')
+    plt.title("Simple Sine Wave Plot")
+    plt.xlabel("X-Axis")
+    plt.ylabel("Y-Axis")
+    plt.legend()
+    
+    # Return the plot "figure"
+    return fig
+
+# 2. This is the Gradio interface
+# It tells Gradio to create a web UI with:
+# - An "input" slider for the 'amplitude'
+# - An "output" area to display the plot
+demo = gr.Interface(
+    fn=create_plot,  # The function to call
+    inputs=gr.Slider(minimum=1, maximum=10, value=5, label="Plot Amplitude"), # Input component
+    outputs="plot",  # Output component
+    title="Python 'Drawing' with Gradio Example"
+)
+
+# 3. This line would start the web server
+# if you were running it on your computer
+# demo.launch()
